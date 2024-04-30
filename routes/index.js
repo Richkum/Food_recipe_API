@@ -5,7 +5,7 @@ const router = express.Router();
 
 /* GET home page. */
 router.get("/", function (req, res, next) {
-  pool.query("SELECT * FROM recipes", (err, result) => {
+  pool.query("SELECT * FROM ingredients", (err, result) => {
     if (err) throw err;
     res.status(200).json(result.rows);
   });

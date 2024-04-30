@@ -4,7 +4,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import logger from "morgan";
 
-import indexRouter from "./routes/index.js";
+import indexRouter from "./routes/db_utils/index.js";
 import usersRouter from "./routes/users.js";
 
 const app = express();

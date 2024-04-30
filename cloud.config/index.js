@@ -25,28 +25,19 @@ cloudinary.config({
 
 // Function to upload image to Cloudinary
 
-// Function to upload image to Cloudinary
 const uploadImage = async (file) => {
-  // Check if the 'file' parameter is valid. It must have a 'path' property.
   if (!file || !file.path) {
-    throw new Error(
-      "Invalid file parameter. File must have a 'path' property."
-    );
+    throw new Error("Invalid file parameter");
   }
 
   try {
-    // Upload the file to Cloudinary using the cloudinary.uploader.upload() method.
     const result = await cloudinary.uploader.upload(file.path);
-
-    // Check if the upload was successful. The result should have a 'secure_url' property.
     if (!result || !result.secure_url) {
       throw new Error("Error uploading image to Cloudinary");
     }
 
-    // Return the secure URL of the uploaded image.
     return result.secure_url;
   } catch (error) {
-    // Log the error and re-throw it.
     console.error("Error uploading image to Cloudinary:", error);
     throw new Error("Error uploading image to Cloudinary");
   }
