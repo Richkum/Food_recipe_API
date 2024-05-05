@@ -23,7 +23,6 @@ router.post("/recipes", async (req, res, next) => {
     const { title, instructions, image_url, category_id, ingredients } =
       req.body;
 
-    // Insert recipe into the recipes table and retrieve the assigned recipe_id
     const recipeQuery = `
       INSERT INTO recipes (title, instructions, image_url, category_id) 
       VALUES ($1, $2, $3, $4) 
@@ -36,7 +35,6 @@ router.post("/recipes", async (req, res, next) => {
     } = await pool.query(recipeQuery, recipeValues);
     console.log("Inserted recipe:", recipe);
 
-    // Retrieve ingredient IDs based on ingredient names
     const ingredientIdsQuery = `
       SELECT ingredient_id FROM ingredients WHERE name = ANY($1)
     `;
@@ -51,7 +49,6 @@ router.post("/recipes", async (req, res, next) => {
     ]);
     console.log("Retrieved ingredient IDs:", ingredientIds);
 
-    // Insert recipe ingredients into the recipe_ingredients table
     const insertIngredientsQuery = `
       INSERT INTO recipe_ingredients (recipe_id, ingredient_id) 
       VALUES ($1, $2)
@@ -80,18 +77,15 @@ router.get("/recipes/:id", async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    // Fetch recipe details from the recipes table
     const { rows: recipes } = await pool.query(
       "SELECT * FROM recipes WHERE recipe_id = $1",
       [id]
     );
 
-    // Check if the recipe exists
     if (recipes.length === 0) {
       return res.status(404).json({ error: "Recipe not found" });
     }
 
-    // Fetch ingredients associated with the recipe from the recipe_ingredients table
     const { rows: ingredients } = await pool.query(
       `SELECT i.name 
        FROM recipe_ingredients ri
@@ -100,19 +94,16 @@ router.get("/recipes/:id", async (req, res, next) => {
       [id]
     );
 
-    // Extract ingredient names from the query result
     const ingredientNames = ingredients.map((ingredient) => ingredient.name);
 
-    // Construct the recipe object with ingredients
     const recipe = {
-      ...recipes[0], // Get the first (and only) recipe from the query result
+      ...recipes[0],
       ingredients: ingredientNames,
     };
 
-    // Send the recipe object as JSON response
     res.json(recipe);
   } catch (error) {
-    next(error); // Pass any errors to the error handling middleware
+    next(error);
   }
 });
 
@@ -123,14 +114,12 @@ router.put("/recipes/:id", async (req, res, next) => {
     const { title, instructions, image_url, category_id, ingredients } =
       req.body;
 
-    // Check if required fields are provided
     if (!title || !instructions || !category_id || !ingredients) {
       return res.status(400).json({
         error: "Title, instructions, category ID, and ingredients are required",
       });
     }
 
-    // Update recipe details in the recipes table
     await pool.query(
       `
       UPDATE recipes SET 
@@ -144,12 +133,10 @@ router.put("/recipes/:id", async (req, res, next) => {
       [title, instructions, image_url, category_id, id]
     );
 
-    // Delete existing ingredients associated with the recipe
     await pool.query(`DELETE FROM recipe_ingredients WHERE recipe_id = $1`, [
       id,
     ]);
 
-    // Insert new ingredients into the recipe_ingredients table
     const ingredientValues = ingredients.map((ingredient) => [
       id,
       ingredient.name,
@@ -165,7 +152,7 @@ router.put("/recipes/:id", async (req, res, next) => {
 
     res.json({ message: "Recipe and ingredients updated successfully" });
   } catch (error) {
-    next(error); // Pass any errors to the error handling middleware
+    next(error);
   }
 });
 
@@ -175,22 +162,18 @@ router.delete("/recipes/:id", async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    // Delete recipe from the recipes table
     const result = await pool.query(
       "DELETE FROM recipes WHERE recipe_id = $1",
       [id]
     );
 
-    // Check if the recipe was found and deleted
     if (result.rowCount === 0) {
       return res.status(404).json({ error: "Recipe not found" });
     }
 
-    // Optionally, you can delete associated ingredients from the recipe_ingredients table here
-
     res.json({ message: "Recipe deleted successfully" });
   } catch (error) {
-    next(error); // Pass any errors to the error handling middleware
+    next(error);
   }
 });
 
@@ -199,14 +182,12 @@ router.get("/recipes/category/:categoryId", async (req, res, next) => {
   try {
     const { categoryId } = req.params;
 
-    // Fetch recipes from the recipes table based on category ID
     const query = `
       SELECT * FROM recipes
       WHERE category_id = $1
     `;
     const { rows: recipes } = await pool.query(query, [categoryId]);
 
-    // Check if any recipes were found for the given category ID
     if (recipes.length === 0) {
       return res
         .status(404)
@@ -215,7 +196,7 @@ router.get("/recipes/category/:categoryId", async (req, res, next) => {
 
     res.status(200).json(recipes);
   } catch (error) {
-    next(error); // Pass any errors to the error handling middleware
+    next(error);
   }
 });
 
