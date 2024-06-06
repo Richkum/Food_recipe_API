@@ -1,14 +1,14 @@
 import express from "express";
-import pool from "../db.config/index.js";
+import recipesRouter from "./recipes.js";
+import categoriesRouter from "./categories.js";
+import ingredientsRouter from "./ingredients.js";
+import tagsRouter from "./tags.js";
 
 const router = express.Router();
 
-/* GET home page. */
-router.get("/", function (req, res, next) {
-  pool.query("SELECT * FROM ingredients", (err, result) => {
-    if (err) throw err;
-    res.status(200).json(result.rows);
-  });
-});
+router.use("/recipes", recipesRouter);
+router.use("/categories", categoriesRouter);
+router.use("/ingredients", ingredientsRouter);
+router.use("/tags", tagsRouter);
 
 export default router;
