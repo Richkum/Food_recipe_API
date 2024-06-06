@@ -6,7 +6,6 @@ import { CloudinaryStorage } from "multer-storage-cloudinary";
 
 const router = express.Router();
 
-// Configure multer-storage-cloudinary
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
@@ -16,17 +15,6 @@ const storage = new CloudinaryStorage({
 });
 
 const upload = multer({ storage });
-
-/**
- * @swagger
- * /recipes:
- *   get:
- *     summary: Get all recipes
- *     tags: [Recipes]
- *     responses:
- *       200:
- *         description: A list of recipes
- */
 
 // Fetch all recipes
 router.get("/", async (req, res, next) => {
@@ -46,36 +34,6 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-/**
- * @swagger
- * /recipes:
- *   post:
- *     summary: Create a new recipe
- *     tags: [Recipes]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               title:
- *                 type: string
- *               instructions:
- *                 type: string
- *               image_url:
- *                 type: string
- *               category_id:
- *                 type: integer
- *               ingredients:
- *                 type: array
- *                 items:
- *                   type: string
- *     responses:
- *       201:
- *         description: Recipe created successfully
- */
-
 // Create a new recipe
 router.post("/", async (req, res, next) => {
   const client = await pool.connect();
@@ -83,10 +41,8 @@ router.post("/", async (req, res, next) => {
     const { title, instructions, image_url, category_id, ingredients } =
       req.body;
 
-    // Start transaction
     await client.query("BEGIN");
 
-    // Insert into recipes table
     const insertRecipeQuery = `
       INSERT INTO recipes (title, instructions, image_url, category_id)
       VALUES ($1, $2, $3, $4)
@@ -101,11 +57,9 @@ router.post("/", async (req, res, next) => {
       category_id,
     ]);
 
-    // Insert into ingredients and recipe_ingredients tables
     for (const ingredient of ingredients) {
       const { name, quantity, unit } = ingredient;
 
-      // Insert ingredient into ingredients table (if it doesn't already exist)
       const insertIngredientQuery = `
         INSERT INTO ingredients (name)
         VALUES ($1)
@@ -119,10 +73,8 @@ router.post("/", async (req, res, next) => {
 
       let ingredient_id;
       if (ingredientRows.length > 0) {
-        // Ingredient was newly inserted, get the new ingredient_id
         ingredient_id = ingredientRows[0].ingredient_id;
       } else {
-        // Ingredient already exists, fetch the existing ingredient_id
         const selectIngredientQuery =
           "SELECT ingredient_id FROM ingredients WHERE name = $1";
         const { rows: existingIngredientRows } = await client.query(
@@ -132,7 +84,6 @@ router.post("/", async (req, res, next) => {
         ingredient_id = existingIngredientRows[0].ingredient_id;
       }
 
-      // Insert into recipe_ingredients table
       const insertRecipeIngredientQuery = `
         INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity, unit)
         VALUES ($1, $2, $3, $4)
@@ -145,7 +96,6 @@ router.post("/", async (req, res, next) => {
       ]);
     }
 
-    // Commit transaction
     await client.query("COMMIT");
 
     res.status(201).json({ recipe_id });
@@ -156,24 +106,6 @@ router.post("/", async (req, res, next) => {
     client.release();
   }
 });
-
-/**
- * @swagger
- * /recipes/{id}:
- *   get:
- *     summary: Get a recipe by ID
- *     tags: [Recipes]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *         description: The recipe ID
- *     responses:
- *       200:
- *         description: A recipe object
- */
 
 // Fetch a recipe by ID
 router.get("/:id", async (req, res, next) => {
@@ -199,43 +131,6 @@ router.get("/:id", async (req, res, next) => {
     next(error);
   }
 });
-
-/**
- * @swagger
- * /recipes/{id}:
- *   put:
- *     summary: Update a recipe
- *     tags: [Recipes]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *         description: The recipe ID
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               title:
- *                 type: string
- *               instructions:
- *                 type: string
- *               image_url:
- *                 type: string
- *               category_id:
- *                 type: integer
- *               ingredients:
- *                 type: array
- *                 items:
- *                   type: string
- *     responses:
- *       200:
- *         description: Recipe updated successfully
- */
 
 // Update a recipe
 router.put("/:id", async (req, res, next) => {
@@ -282,24 +177,6 @@ router.put("/:id", async (req, res, next) => {
     next(error);
   }
 });
-
-/**
- * @swagger
- * /recipes/{id}:
- *   delete:
- *     summary: Delete a recipe
- *     tags: [Recipes]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *         description: The recipe ID
- *     responses:
- *       200:
- *         description: Recipe deleted successfully
- */
 
 // Delete a recipe
 router.delete("/:id", async (req, res, next) => {
