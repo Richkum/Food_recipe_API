@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1717680514898" clover="3.2.0">
-  <project timestamp="1717680514899" name="All files">
-    <metrics statements="226" coveredstatements="87" conditionals="34" coveredconditionals="6" methods="27" coveredmethods="8" elements="287" coveredelements="101" complexity="0" loc="226" ncloc="226" packages="3" files="8" classes="8"/>
+<coverage generated="1717765437942" clover="3.2.0">
+  <project timestamp="1717765437942" name="All files">
+    <metrics statements="244" coveredstatements="91" conditionals="40" coveredconditionals="8" methods="26" coveredmethods="8" elements="310" coveredelements="107" complexity="0" loc="244" ncloc="244" packages="4" files="9" classes="9"/>
     <package name="Food_recipe_API">
-      <metrics statements="17" coveredstatements="12" conditionals="4" coveredconditionals="0" methods="3" coveredmethods="1"/>
+      <metrics statements="17" coveredstatements="16" conditionals="4" coveredconditionals="3" methods="3" coveredmethods="2"/>
       <file name="app.js" path="/home/atum/Desktop/Portal-projects/Food_recipe_API/app.js">
-        <metrics statements="14" coveredstatements="9" conditionals="4" coveredconditionals="0" methods="2" coveredmethods="0"/>
+        <metrics statements="14" coveredstatements="13" conditionals="4" coveredconditionals="3" methods="2" coveredmethods="1"/>
         <line num="9" count="1" type="stmt"/>
         <line num="11" count="1" type="stmt"/>
         <line num="12" count="1" type="stmt"/>
@@ -16,16 +16,24 @@
         <line num="22" count="1" type="stmt"/>
         <line num="23" count="0" type="stmt"/>
         <line num="27" count="1" type="stmt"/>
-        <line num="28" count="0" type="stmt"/>
-        <line num="29" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="30" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="31" count="0" type="stmt"/>
+        <line num="28" count="1" type="stmt"/>
+        <line num="29" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="30" count="1" type="cond" truecount="2" falsecount="0"/>
+        <line num="31" count="1" type="stmt"/>
       </file>
       <file name="swagger.js" path="/home/atum/Desktop/Portal-projects/Food_recipe_API/swagger.js">
         <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
         <line num="4" count="1" type="stmt"/>
         <line num="24" count="1" type="stmt"/>
         <line num="27" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="Food_recipe_API.cloud.config">
+      <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <file name="cloudinary.js" path="/home/atum/Desktop/Portal-projects/Food_recipe_API/cloud.config/cloudinary.js">
+        <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="4" count="1" type="stmt"/>
+        <line num="6" count="1" type="stmt"/>
       </file>
     </package>
     <package name="Food_recipe_API.db.config">
@@ -42,7 +50,7 @@
       </file>
     </package>
     <package name="Food_recipe_API.routes">
-      <metrics statements="202" coveredstatements="70" conditionals="30" coveredconditionals="6" methods="22" coveredmethods="7"/>
+      <metrics statements="218" coveredstatements="68" conditionals="36" coveredconditionals="5" methods="21" coveredmethods="6"/>
       <file name="categories.js" path="/home/atum/Desktop/Portal-projects/Food_recipe_API/routes/categories.js">
         <metrics statements="42" coveredstatements="6" conditionals="6" coveredconditionals="0" methods="5" coveredmethods="0"/>
         <line num="4" count="1" type="stmt"/>
@@ -142,78 +150,94 @@
         <line num="88" count="0" type="stmt"/>
       </file>
       <file name="recipes.js" path="/home/atum/Desktop/Portal-projects/Food_recipe_API/routes/recipes.js">
-        <metrics statements="71" coveredstatements="47" conditionals="12" coveredconditionals="6" methods="7" coveredmethods="7"/>
-        <line num="3" count="1" type="stmt"/>
-        <line num="17" count="1" type="stmt"/>
+        <metrics statements="87" coveredstatements="45" conditionals="18" coveredconditionals="5" methods="6" coveredmethods="6"/>
+        <line num="7" count="1" type="stmt"/>
+        <line num="10" count="1" type="stmt"/>
         <line num="18" count="1" type="stmt"/>
-        <line num="19" count="1" type="stmt"/>
-        <line num="22" count="1" type="stmt"/>
-        <line num="23" count="1" type="stmt"/>
-        <line num="25" count="0" type="stmt"/>
-        <line num="60" count="1" type="stmt"/>
-        <line num="61" count="1" type="stmt"/>
-        <line num="62" count="1" type="stmt"/>
-        <line num="64" count="1" type="stmt"/>
-        <line num="67" count="1" type="stmt"/>
-        <line num="70" count="0" type="stmt"/>
-        <line num="77" count="0" type="stmt"/>
-        <line num="85" count="0" type="stmt"/>
-        <line num="86" count="0" type="stmt"/>
-        <line num="89" count="0" type="stmt"/>
-        <line num="95" count="0" type="stmt"/>
-        <line num="101" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="103" count="0" type="stmt"/>
+        <line num="32" count="1" type="stmt"/>
+        <line num="33" count="1" type="stmt"/>
+        <line num="34" count="1" type="stmt"/>
+        <line num="42" count="1" type="stmt"/>
+        <line num="43" count="1" type="stmt"/>
+        <line num="45" count="0" type="stmt"/>
+        <line num="80" count="1" type="stmt"/>
+        <line num="82" count="1" type="stmt"/>
+        <line num="83" count="1" type="stmt"/>
+        <line num="85" count="1" type="stmt"/>
+        <line num="88" count="1" type="stmt"/>
+        <line num="91" count="0" type="stmt"/>
+        <line num="98" count="0" type="stmt"/>
+        <line num="106" count="0" type="stmt"/>
         <line num="107" count="0" type="stmt"/>
-        <line num="108" count="0" type="stmt"/>
-        <line num="112" count="0" type="stmt"/>
+        <line num="110" count="0" type="stmt"/>
         <line num="116" count="0" type="stmt"/>
-        <line num="120" count="0" type="stmt"/>
+        <line num="122" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="124" count="0" type="stmt"/>
+        <line num="128" count="0" type="stmt"/>
         <line num="129" count="0" type="stmt"/>
-        <line num="131" count="0" type="stmt"/>
-        <line num="133" count="1" type="stmt"/>
-        <line num="134" count="0" type="stmt"/>
-        <line num="136" count="1" type="stmt"/>
-        <line num="159" count="1" type="stmt"/>
-        <line num="160" count="1" type="stmt"/>
-        <line num="161" count="1" type="stmt"/>
-        <line num="162" count="1" type="stmt"/>
-        <line num="170" count="1" type="stmt"/>
-        <line num="172" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="173" count="0" type="stmt"/>
-        <line num="176" count="1" type="stmt"/>
-        <line num="178" count="0" type="stmt"/>
-        <line num="220" count="1" type="stmt"/>
-        <line num="221" count="1" type="stmt"/>
-        <line num="222" count="1" type="stmt"/>
-        <line num="224" count="1" type="stmt"/>
-        <line num="226" count="1" type="stmt"/>
-        <line num="235" count="1" type="stmt"/>
-        <line num="243" count="1" type="cond" truecount="3" falsecount="1"/>
-        <line num="244" count="1" type="stmt"/>
+        <line num="133" count="0" type="stmt"/>
+        <line num="137" count="0" type="stmt"/>
+        <line num="141" count="0" type="stmt"/>
+        <line num="150" count="0" type="stmt"/>
+        <line num="152" count="0" type="stmt"/>
+        <line num="154" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="155" count="0" type="stmt"/>
+        <line num="157" count="1" type="stmt"/>
+        <line num="159" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="160" count="0" type="stmt"/>
+        <line num="184" count="1" type="stmt"/>
+        <line num="185" count="1" type="stmt"/>
+        <line num="186" count="1" type="stmt"/>
+        <line num="187" count="1" type="stmt"/>
+        <line num="196" count="1" type="stmt"/>
+        <line num="198" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="199" count="0" type="stmt"/>
+        <line num="202" count="1" type="stmt"/>
+        <line num="204" count="0" type="stmt"/>
+        <line num="246" count="1" type="stmt"/>
         <line num="248" count="1" type="stmt"/>
-        <line num="249" count="2" type="stmt"/>
-        <line num="250" count="2" type="stmt"/>
-        <line num="256" count="1" type="stmt"/>
-        <line num="259" count="1" type="stmt"/>
-        <line num="261" count="0" type="stmt"/>
-        <line num="284" count="1" type="stmt"/>
-        <line num="285" count="1" type="stmt"/>
-        <line num="286" count="1" type="stmt"/>
-        <line num="287" count="1" type="stmt"/>
-        <line num="288" count="1" type="stmt"/>
-        <line num="290" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="291" count="0" type="stmt"/>
-        <line num="294" count="1" type="stmt"/>
+        <line num="249" count="1" type="stmt"/>
+        <line num="250" count="1" type="stmt"/>
+        <line num="252" count="1" type="stmt"/>
+        <line num="255" count="1" type="stmt"/>
+        <line num="257" count="0" type="stmt"/>
+        <line num="266" count="0" type="stmt"/>
+        <line num="274" count="0" type="cond" truecount="0" falsecount="4"/>
+        <line num="275" count="0" type="stmt"/>
+        <line num="280" count="0" type="stmt"/>
+        <line num="281" count="0" type="stmt"/>
+        <line num="283" count="0" type="stmt"/>
+        <line num="289" count="0" type="stmt"/>
+        <line num="295" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="296" count="0" type="stmt"/>
-        <line num="301" count="1" type="stmt"/>
-        <line num="302" count="1" type="stmt"/>
-        <line num="303" count="1" type="stmt"/>
-        <line num="304" count="1" type="stmt"/>
-        <line num="313" count="1" type="stmt"/>
-        <line num="315" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="316" count="0" type="stmt"/>
-        <line num="321" count="1" type="stmt"/>
-        <line num="323" count="0" type="stmt"/>
+        <line num="299" count="0" type="stmt"/>
+        <line num="300" count="0" type="stmt"/>
+        <line num="304" count="0" type="stmt"/>
+        <line num="308" count="0" type="stmt"/>
+        <line num="312" count="0" type="stmt"/>
+        <line num="322" count="0" type="stmt"/>
+        <line num="324" count="0" type="stmt"/>
+        <line num="326" count="1" type="stmt"/>
+        <line num="327" count="0" type="stmt"/>
+        <line num="329" count="1" type="stmt"/>
+        <line num="352" count="1" type="stmt"/>
+        <line num="353" count="1" type="stmt"/>
+        <line num="354" count="1" type="stmt"/>
+        <line num="355" count="1" type="stmt"/>
+        <line num="356" count="1" type="stmt"/>
+        <line num="358" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="359" count="0" type="stmt"/>
+        <line num="362" count="1" type="stmt"/>
+        <line num="364" count="0" type="stmt"/>
+        <line num="369" count="1" type="stmt"/>
+        <line num="370" count="1" type="stmt"/>
+        <line num="371" count="1" type="stmt"/>
+        <line num="372" count="1" type="stmt"/>
+        <line num="389" count="1" type="stmt"/>
+        <line num="391" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="392" count="0" type="stmt"/>
+        <line num="397" count="1" type="stmt"/>
+        <line num="399" count="0" type="stmt"/>
       </file>
       <file name="tags.js" path="/home/atum/Desktop/Portal-projects/Food_recipe_API/routes/tags.js">
         <metrics statements="42" coveredstatements="6" conditionals="6" coveredconditionals="0" methods="5" coveredmethods="0"/>

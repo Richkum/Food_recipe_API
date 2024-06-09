@@ -1,13 +1,14 @@
 import express from "express";
-import pool from "../db.config/index.js";
-import cloudinary from "../cloud.config/cloudinary.js";
 import multer from "multer";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
+import pool from "../db.config/index.js";
+import cloudinary from "../cloud.config/cloudinary.js";
 
 const router = express.Router();
 
+// Configure multer-storage-cloudinary
 const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
+  cloudinary,
   params: {
     folder: "recipes",
     allowed_formats: ["jpg", "jpeg", "png"],
@@ -15,6 +16,50 @@ const storage = new CloudinaryStorage({
 });
 
 const upload = multer({ storage });
+/**
+ * @swagger
+ * /recipes:
+ *   get:
+ *     summary: Get all recipes
+ *     tags: [Recipes]
+ *     responses:
+ *       200:
+ *         description: A list of recipes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   recipe_id:
+ *                     type: integer
+ *                   title:
+ *                     type: string
+ *                   instructions:
+ *                     type: string
+ *                   image_url:
+ *                     type: string
+ *                   category_id:
+ *                     type: integer
+ *                   created_at:
+ *                     type: string
+ *                     format: date-time
+ *                   updated_at:
+ *                     type: string
+ *                     format: date-time
+ *                   ingredients:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         name:
+ *                           type: string
+ *                         quantity:
+ *                           type: number
+ *                         unit:
+ *                           type: string
+ */
 
 // Fetch all recipes
 router.get("/", async (req, res, next) => {
@@ -34,15 +79,67 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+/**
+ * @swagger
+ * /recipes:
+ *   post:
+ *     summary: Create a new recipe
+ *     tags: [Recipes]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *               - instructions
+ *               - category_id
+ *               - ingredients
+ *             properties:
+ *               title:
+ *                 type: string
+ *               instructions:
+ *                 type: string
+ *               image_url:
+ *                 type: string
+ *               category_id:
+ *                 type: integer
+ *               ingredients:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                     quantity:
+ *                       type: number
+ *                     unit:
+ *                       type: string
+ *     responses:
+ *       201:
+ *         description: Recipe created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 recipe_id:
+ *                   type: integer
+ */
+
 // Create a new recipe
 router.post("/", async (req, res, next) => {
-  const client = await pool.connect();
+  let client;
   try {
+    client = await pool.connect();
     const { title, instructions, image_url, category_id, ingredients } =
       req.body;
 
+    // Start transaction
     await client.query("BEGIN");
 
+    // Insert into recipes table
     const insertRecipeQuery = `
       INSERT INTO recipes (title, instructions, image_url, category_id)
       VALUES ($1, $2, $3, $4)
@@ -57,9 +154,11 @@ router.post("/", async (req, res, next) => {
       category_id,
     ]);
 
+    // Insert into ingredients and recipe_ingredients tables
     for (const ingredient of ingredients) {
       const { name, quantity, unit } = ingredient;
 
+      // Insert ingredient into ingredients table (if it doesn't already exist)
       const insertIngredientQuery = `
         INSERT INTO ingredients (name)
         VALUES ($1)
@@ -73,8 +172,10 @@ router.post("/", async (req, res, next) => {
 
       let ingredient_id;
       if (ingredientRows.length > 0) {
+        // Ingredient was newly inserted, get the new ingredient_id
         ingredient_id = ingredientRows[0].ingredient_id;
       } else {
+        // Ingredient already exists, fetch the existing ingredient_id
         const selectIngredientQuery =
           "SELECT ingredient_id FROM ingredients WHERE name = $1";
         const { rows: existingIngredientRows } = await client.query(
@@ -84,6 +185,7 @@ router.post("/", async (req, res, next) => {
         ingredient_id = existingIngredientRows[0].ingredient_id;
       }
 
+      // Insert into recipe_ingredients table
       const insertRecipeIngredientQuery = `
         INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity, unit)
         VALUES ($1, $2, $3, $4)
@@ -96,16 +198,73 @@ router.post("/", async (req, res, next) => {
       ]);
     }
 
+    // Commit transaction
     await client.query("COMMIT");
 
     res.status(201).json({ recipe_id });
   } catch (error) {
-    await client.query("ROLLBACK");
+    if (client) {
+      await client.query("ROLLBACK");
+    }
     next(error);
   } finally {
-    client.release();
+    if (client) {
+      client.release();
+    }
   }
 });
+
+/**
+ * @swagger
+ * /recipes/{id}:
+ *   get:
+ *     summary: Get a recipe by ID
+ *     tags: [Recipes]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The recipe ID
+ *     responses:
+ *       200:
+ *         description: A recipe object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 recipe_id:
+ *                   type: integer
+ *                 title:
+ *                   type: string
+ *                 instructions:
+ *                   type: string
+ *                 image_url:
+ *                   type: string
+ *                 category_id:
+ *                   type: integer
+ *                 created_at:
+ *                   type: string
+ *                   format: date-time
+ *                 updated_at:
+ *                   type: string
+ *                   format: date-time
+ *                 ingredients:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       name:
+ *                         type: string
+ *                       quantity:
+ *                         type: number
+ *                       unit:
+ *                         type: string
+ *       404:
+ *         description: Recipe not found
+ */
 
 // Fetch a recipe by ID
 router.get("/:id", async (req, res, next) => {
@@ -132,12 +291,71 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
+/**
+ * @swagger
+ * /recipes/{id}:
+ *   put:
+ *     summary: Update a recipe
+ *     tags: [Recipes]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The recipe ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *               - instructions
+ *               - category_id
+ *               - ingredients
+ *             properties:
+ *               title:
+ *                 type: string
+ *               instructions:
+ *                 type: string
+ *               image_url:
+ *                 type: string
+ *               category_id:
+ *                 type: integer
+ *               ingredients:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                     quantity:
+ *                       type: number
+ *                     unit:
+ *                       type: string
+ *     responses:
+ *       200:
+ *         description: Recipe updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                */
+
 // Update a recipe
 router.put("/:id", async (req, res, next) => {
+  let client;
   try {
+    client = await pool.connect();
     const { id } = req.params;
     const { title, instructions, image_url, category_id, ingredients } =
       req.body;
+
+    // Start transaction
+    await client.query("BEGIN");
 
     const updateRecipeQuery = `
       UPDATE recipes SET 
@@ -148,7 +366,7 @@ router.put("/:id", async (req, res, next) => {
         updated_at = CURRENT_TIMESTAMP
       WHERE recipe_id = $5
     `;
-    await pool.query(updateRecipeQuery, [
+    await client.query(updateRecipeQuery, [
       title,
       instructions,
       image_url,
@@ -157,32 +375,87 @@ router.put("/:id", async (req, res, next) => {
     ]);
 
     if (ingredients && ingredients.length > 0) {
-      await pool.query(`DELETE FROM recipe_ingredients WHERE recipe_id = $1`, [
-        id,
-      ]);
+      await client.query(
+        "DELETE FROM recipe_ingredients WHERE recipe_id = $1",
+        [id]
+      );
 
-      const ingredientQueries = ingredients.map((ingredient) => {
+      for (const ingredient of ingredients) {
         const { name, quantity, unit } = ingredient;
-        return pool.query(
-          `INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity, unit) 
-          VALUES ($1, (SELECT ingredient_id FROM ingredients WHERE name = $2), $3, $4)`,
-          [id, name, quantity, unit]
+
+        const insertIngredientQuery = `
+          INSERT INTO ingredients (name)
+          VALUES ($1)
+          ON CONFLICT (name) DO NOTHING
+          RETURNING ingredient_id
+        `;
+        const { rows: ingredientRows } = await client.query(
+          insertIngredientQuery,
+          [name]
         );
-      });
-      await Promise.all(ingredientQueries);
+
+        let ingredient_id;
+        if (ingredientRows.length > 0) {
+          ingredient_id = ingredientRows[0].ingredient_id;
+        } else {
+          const selectIngredientQuery =
+            "SELECT ingredient_id FROM ingredients WHERE name = $1";
+          const { rows: existingIngredientRows } = await client.query(
+            selectIngredientQuery,
+            [name]
+          );
+          ingredient_id = existingIngredientRows[0].ingredient_id;
+        }
+
+        // Insert into recipe_ingredients table
+        const insertRecipeIngredientQuery = `
+          INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity, unit)
+          VALUES ($1, $2, $3, $4)
+        `;
+        await client.query(insertRecipeIngredientQuery, [
+          id,
+          ingredient_id,
+          quantity,
+          unit,
+        ]);
+      }
     }
+
+    // Commit transaction
+    await client.query("COMMIT");
 
     res.json({ message: "Recipe and ingredients updated successfully" });
   } catch (error) {
+    await client.query("ROLLBACK");
     next(error);
+  } finally {
+    client.release();
   }
 });
+
+/**
+ * @swagger
+ * /recipes/{id}:
+ *   delete:
+ *     summary: Delete a recipe
+ *     tags: [Recipes]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The recipe ID
+ *     responses:
+ *       200:
+ *         description: Recipe deleted successfully
+ */
 
 // Delete a recipe
 router.delete("/:id", async (req, res, next) => {
   try {
     const { id } = req.params;
-    const deleteQuery = `DELETE FROM recipes WHERE recipe_id = $1`;
+    const deleteQuery = "DELETE FROM recipes WHERE recipe_id = $1";
     const result = await pool.query(deleteQuery, [id]);
 
     if (result.rowCount === 0) {
@@ -195,13 +468,77 @@ router.delete("/:id", async (req, res, next) => {
   }
 });
 
+/**
+ * @swagger
+ * /recipes/category/{id}:
+ *   get:
+ *     summary: Get recipes by category ID
+ *     tags: [Recipes]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The category ID
+ *     responses:
+ *       200:
+ *         description: A list of recipes in the specified category
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   recipe_id:
+ *                     type: integer
+ *                   title:
+ *                     type: string
+ *                   instructions:
+ *                     type: string
+ *                   image_url:
+ *                     type: string
+ *                   category_id:
+ *                     type: integer
+ *                   created_at:
+ *                     type: string
+ *                     format: date-time
+ *                   updated_at:
+ *                     type: string
+ *                     format: date-time
+ *                   ingredients:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         name:
+ *                           type: string
+ *                         quantity:
+ *                           type: number
+ *                         unit:
+ *                           type: string
+ *       404:
+ *         description: No recipes found for this category
+ *       500:
+ *         description: Server error
+ */
+
 // Fetch recipes by category ID
 router.get("/category/:id", async (req, res, next) => {
   try {
     const { id } = req.params;
     const query = `
-      SELECT r.recipe_id, r.title, r.instructions, r.image_url, r.category_id, 
-             array_agg(i.name) AS ingredients
+      SELECT 
+        r.recipe_id, r.title, r.instructions, r.image_url, r.category_id, 
+        r.created_at, r.updated_at,
+        json_agg(
+          json_build_object(
+            'name', i.name,
+            'quantity', ri.quantity,
+            'unit', ri.unit
+          )
+        ) AS ingredients
       FROM recipes r
       JOIN recipe_ingredients ri ON r.recipe_id = ri.recipe_id
       JOIN ingredients i ON ri.ingredient_id = i.ingredient_id
