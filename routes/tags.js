@@ -8,9 +8,9 @@ router.get('/', async (req, res, next) => {
   try {
     const query = 'SELECT * FROM tags';
     const { rows: tags } = await pool.query(query);
-    res.status(200).json(tags);
+    return res.status(200).json(tags);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 });
 
@@ -22,9 +22,9 @@ router.post('/', async (req, res, next) => {
     const {
       rows: [tag],
     } = await pool.query(query, [name]);
-    res.status(201).json(tag);
+    return res.status(201).json(tag);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 });
 
@@ -41,9 +41,9 @@ router.get('/:id', async (req, res, next) => {
       return res.status(404).json({ error: 'Tag not found' });
     }
 
-    res.json(tag);
+    return res.json(tag);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 });
 
@@ -61,9 +61,9 @@ router.put('/:id', async (req, res, next) => {
       return res.status(404).json({ error: 'Tag not found' });
     }
 
-    res.json(tag);
+    return res.json(tag);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 });
 
@@ -80,9 +80,9 @@ router.delete('/:id', async (req, res, next) => {
       return res.status(404).json({ error: 'Tag not found' });
     }
 
-    res.json({ message: 'Tag deleted successfully' });
+    return res.json({ message: 'Tag deleted successfully' });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 });
 

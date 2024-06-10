@@ -1,21 +1,21 @@
-import express from "express";
-import multer from "multer";
-import { CloudinaryStorage } from "multer-storage-cloudinary";
-import pool from "../db.config/index.js";
-import cloudinary from "../cloud.config/cloudinary.js";
+import express from 'express';
+// import multer from 'multer';
+// import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import pool from '../db.config/index.js';
+// import cloudinary from '../cloud.config/cloudinary.js';
 
 const router = express.Router();
 
 // Configure multer-storage-cloudinary
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: "recipes",
-    allowed_formats: ["jpg", "jpeg", "png"],
-  },
-});
+// const storage = new CloudinaryStorage({
+//   cloudinary,
+//   params: {
+//     folder: 'recipes',
+//     allowed_formats: ['jpg', 'jpeg', 'png'],
+//   },
+// });
 
-const upload = multer({ storage });
+// const upload = multer({ storage });
 /**
  * @swagger
  * /recipes:
@@ -62,7 +62,7 @@ const upload = multer({ storage });
  */
 
 // Fetch all recipes
-router.get("/", async (req, res, next) => {
+router.get('/', async (req, res) => {
   try {
     const query = `
       SELECT r.recipe_id, r.title, r.instructions, r.image_url, r.category_id, r.created_at, r.updated_at,
@@ -73,9 +73,9 @@ router.get("/", async (req, res, next) => {
       GROUP BY r.recipe_id
     `;
     const { rows: recipes } = await pool.query(query);
-    res.status(200).json(recipes);
+    return res.status(200).json(recipes);
   } catch (error) {
-    next(error);
+    return res.status(500).json({ error: 'Internal Server Error' }); // Return an error response
   }
 });
 
@@ -129,15 +129,16 @@ router.get("/", async (req, res, next) => {
  */
 
 // Create a new recipe
-router.post("/", async (req, res, next) => {
+router.post('/', async (req, res, next) => {
   let client;
   try {
     client = await pool.connect();
-    const { title, instructions, image_url, category_id, ingredients } =
-      req.body;
+    const {
+      title, instructions, imageUrl, categoryId, ingredients,
+    } = req.body;
 
     // Start transaction
-    await client.query("BEGIN");
+    await client.query('BEGIN');
 
     // Insert into recipes table
     const insertRecipeQuery = `
@@ -146,16 +147,16 @@ router.post("/", async (req, res, next) => {
       RETURNING recipe_id
     `;
     const {
-      rows: [{ recipe_id }],
+      rows: [{ recipe_id: recipeId }],
     } = await client.query(insertRecipeQuery, [
       title,
       instructions,
-      image_url,
-      category_id,
+      imageUrl,
+      categoryId,
     ]);
 
     // Insert into ingredients and recipe_ingredients tables
-    for (const ingredient of ingredients) {
+    const ingredientPromises = ingredients.map(async (ingredient) => {
       const { name, quantity, unit } = ingredient;
 
       // Insert ingredient into ingredients table (if it doesn't already exist)
@@ -167,22 +168,21 @@ router.post("/", async (req, res, next) => {
       `;
       const { rows: ingredientRows } = await client.query(
         insertIngredientQuery,
-        [name]
+        [name],
       );
 
-      let ingredient_id;
+      let ingredientId;
       if (ingredientRows.length > 0) {
         // Ingredient was newly inserted, get the new ingredient_id
-        ingredient_id = ingredientRows[0].ingredient_id;
+        ingredientId = ingredientRows[0].ingredient_id;
       } else {
         // Ingredient already exists, fetch the existing ingredient_id
-        const selectIngredientQuery =
-          "SELECT ingredient_id FROM ingredients WHERE name = $1";
+        const selectIngredientQuery = 'SELECT ingredient_id FROM ingredients WHERE name = $1';
         const { rows: existingIngredientRows } = await client.query(
           selectIngredientQuery,
-          [name]
+          [name],
         );
-        ingredient_id = existingIngredientRows[0].ingredient_id;
+        ingredientId = existingIngredientRows[0].ingredient_id;
       }
 
       // Insert into recipe_ingredients table
@@ -191,22 +191,25 @@ router.post("/", async (req, res, next) => {
         VALUES ($1, $2, $3, $4)
       `;
       await client.query(insertRecipeIngredientQuery, [
-        recipe_id,
-        ingredient_id,
+        recipeId,
+        ingredientId,
         quantity,
         unit,
       ]);
-    }
+    });
+
+    await Promise.all(ingredientPromises);
 
     // Commit transaction
-    await client.query("COMMIT");
+    await client.query('COMMIT');
 
-    res.status(201).json({ recipe_id });
+    return res.status(201).json({ recipeId });
   } catch (error) {
     if (client) {
-      await client.query("ROLLBACK");
+      await client.query('ROLLBACK');
     }
     next(error);
+    return res.status(500).json({ error: 'Internal Server Error' }); // Return an error response
   } finally {
     if (client) {
       client.release();
@@ -267,7 +270,7 @@ router.post("/", async (req, res, next) => {
  */
 
 // Fetch a recipe by ID
-router.get("/:id", async (req, res, next) => {
+router.get('/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
     const query = `
@@ -281,13 +284,12 @@ router.get("/:id", async (req, res, next) => {
     `;
     const { rows: recipes } = await pool.query(query, [id]);
 
-    if (recipes.length === 0) {
-      return res.status(404).json({ error: "Recipe not found" });
-    }
-
-    res.json(recipes[0]);
+    return recipes.length === 0
+      ? res.status(404).json({ error: 'Recipe not found' })
+      : res.json(recipes[0]);
   } catch (error) {
     next(error);
+    return res.status(500).json({ error: 'Internal Server Error' }); // Return an error response
   }
 });
 
@@ -346,16 +348,17 @@ router.get("/:id", async (req, res, next) => {
  *                */
 
 // Update a recipe
-router.put("/:id", async (req, res, next) => {
+router.put('/:id', async (req, res, next) => {
   let client;
   try {
     client = await pool.connect();
     const { id } = req.params;
-    const { title, instructions, image_url, category_id, ingredients } =
-      req.body;
+    const {
+      title, instructions, imageUrl, categoryId, ingredients,
+    } = req.body;
 
     // Start transaction
-    await client.query("BEGIN");
+    await client.query('BEGIN');
 
     const updateRecipeQuery = `
       UPDATE recipes SET 
@@ -369,18 +372,18 @@ router.put("/:id", async (req, res, next) => {
     await client.query(updateRecipeQuery, [
       title,
       instructions,
-      image_url,
-      category_id,
+      imageUrl,
+      categoryId,
       id,
     ]);
 
     if (ingredients && ingredients.length > 0) {
       await client.query(
-        "DELETE FROM recipe_ingredients WHERE recipe_id = $1",
-        [id]
+        'DELETE FROM recipe_ingredients WHERE recipe_id = $1',
+        [id],
       );
 
-      for (const ingredient of ingredients) {
+      const ingredientPromises = ingredients.map(async (ingredient) => {
         const { name, quantity, unit } = ingredient;
 
         const insertIngredientQuery = `
@@ -391,20 +394,19 @@ router.put("/:id", async (req, res, next) => {
         `;
         const { rows: ingredientRows } = await client.query(
           insertIngredientQuery,
-          [name]
+          [name],
         );
 
-        let ingredient_id;
+        let ingredientId;
         if (ingredientRows.length > 0) {
-          ingredient_id = ingredientRows[0].ingredient_id;
+          ingredientId = ingredientRows[0].ingredient_id;
         } else {
-          const selectIngredientQuery =
-            "SELECT ingredient_id FROM ingredients WHERE name = $1";
+          const selectIngredientQuery = 'SELECT ingredient_id FROM ingredients WHERE name = $1';
           const { rows: existingIngredientRows } = await client.query(
             selectIngredientQuery,
-            [name]
+            [name],
           );
-          ingredient_id = existingIngredientRows[0].ingredient_id;
+          ingredientId = existingIngredientRows[0].ingredient_id;
         }
 
         // Insert into recipe_ingredients table
@@ -414,22 +416,28 @@ router.put("/:id", async (req, res, next) => {
         `;
         await client.query(insertRecipeIngredientQuery, [
           id,
-          ingredient_id,
+          ingredientId,
           quantity,
           unit,
         ]);
-      }
+      });
+
+      await Promise.all(ingredientPromises);
     }
 
     // Commit transaction
-    await client.query("COMMIT");
+    await client.query('COMMIT');
 
-    res.json({ message: "Recipe and ingredients updated successfully" });
+    res.json({ message: 'Recipe and ingredients updated successfully' });
   } catch (error) {
-    await client.query("ROLLBACK");
+    if (client) {
+      await client.query('ROLLBACK');
+    }
     next(error);
   } finally {
-    client.release();
+    if (client) {
+      client.release();
+    }
   }
 });
 
@@ -452,19 +460,20 @@ router.put("/:id", async (req, res, next) => {
  */
 
 // Delete a recipe
-router.delete("/:id", async (req, res, next) => {
+router.delete('/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
-    const deleteQuery = "DELETE FROM recipes WHERE recipe_id = $1";
+    const deleteQuery = 'DELETE FROM recipes WHERE recipe_id = $1';
     const result = await pool.query(deleteQuery, [id]);
 
     if (result.rowCount === 0) {
-      return res.status(404).json({ error: "Recipe not found" });
+      return res.status(404).json({ error: 'Recipe not found' });
     }
 
-    res.json({ message: "Recipe deleted successfully" });
+    return res.json({ message: 'Recipe deleted successfully' });
   } catch (error) {
     next(error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
@@ -525,7 +534,7 @@ router.delete("/:id", async (req, res, next) => {
  */
 
 // Fetch recipes by category ID
-router.get("/category/:id", async (req, res, next) => {
+router.get('/category/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
     const query = `
@@ -550,12 +559,13 @@ router.get("/category/:id", async (req, res, next) => {
     if (recipes.length === 0) {
       return res
         .status(404)
-        .json({ error: "No recipes found for this category" });
+        .json({ error: 'No recipes found for this category' });
     }
 
-    res.json(recipes);
+    return res.json(recipes);
   } catch (error) {
     next(error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 

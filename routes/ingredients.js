@@ -8,9 +8,10 @@ router.get('/', async (req, res, next) => {
   try {
     const query = 'SELECT * FROM ingredients';
     const { rows: ingredients } = await pool.query(query);
-    res.status(200).json(ingredients);
+    return res.status(200).json(ingredients);
   } catch (error) {
     next(error);
+    return res.status(500).json({ error: 'Internal Server Error' }); // Added return
   }
 });
 
@@ -22,9 +23,10 @@ router.post('/', async (req, res, next) => {
     const {
       rows: [ingredient],
     } = await pool.query(query, [name]);
-    res.status(201).json(ingredient);
+    return res.status(201).json(ingredient);
   } catch (error) {
     next(error);
+    return res.status(500).json({ error: 'Internal Server Error' }); // Added return
   }
 });
 
@@ -41,9 +43,10 @@ router.get('/:id', async (req, res, next) => {
       return res.status(404).json({ error: 'Ingredient not found' });
     }
 
-    res.json(ingredient);
+    return res.json(ingredient);
   } catch (error) {
     next(error);
+    return res.status(500).json({ error: 'Internal Server Error' }); // Added return
   }
 });
 
@@ -52,9 +55,7 @@ router.put('/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
     const { name } = req.body;
-    const query = `
-      UPDATE ingredients SET name = $1 WHERE ingredient_id = $2 RETURNING *
-    `;
+    const query = 'UPDATE ingredients SET name = $1 WHERE ingredient_id = $2 RETURNING *';
     const {
       rows: [ingredient],
     } = await pool.query(query, [name, id]);
@@ -63,9 +64,10 @@ router.put('/:id', async (req, res, next) => {
       return res.status(404).json({ error: 'Ingredient not found' });
     }
 
-    res.json(ingredient);
+    return res.json(ingredient);
   } catch (error) {
     next(error);
+    return res.status(500).json({ error: 'Internal Server Error' }); // Added return
   }
 });
 
@@ -82,9 +84,10 @@ router.delete('/:id', async (req, res, next) => {
       return res.status(404).json({ error: 'Ingredient not found' });
     }
 
-    res.json({ message: 'Ingredient deleted successfully' });
+    return res.json({ message: 'Ingredient deleted successfully' });
   } catch (error) {
     next(error);
+    return res.status(500).json({ error: 'Internal Server Error' }); // Added return
   }
 });
 

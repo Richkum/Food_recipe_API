@@ -1,5 +1,7 @@
+/* eslint-env jest */
+
 import request from 'supertest';
-import app from '../app';
+import app from '../app.js';
 import pool from '../db.config/index.js';
 
 jest.mock('../db.config/index.js');
