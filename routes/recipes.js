@@ -76,14 +76,14 @@ router.get("/", async (req, res) => {
     return res.status(200).json(recipes);
   } catch (error) {
     console.error("Error fetching recipes:", {
-      message: err.message,
-      stack: err.stack,
-      name: err.name,
-      code: err.code,
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      code: error.code,
     });
     return res
       .status(500)
-      .json({ error: "Internal Server Error", details: err.message }); // Return an error response
+      .json({ error: "Internal Server Error", details: error.message }); // Return an error response
   }
 });
 
