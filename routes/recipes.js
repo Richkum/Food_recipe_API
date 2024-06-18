@@ -75,6 +75,12 @@ router.get("/", async (req, res) => {
     const { rows: recipes } = await pool.query(query);
     return res.status(200).json(recipes);
   } catch (error) {
+    console.error("Error fetching recipes:", {
+      message: err.message,
+      stack: err.stack,
+      name: err.name,
+      code: err.code,
+    });
     return res
       .status(500)
       .json({ error: "Internal Server Error", details: err.message }); // Return an error response
