@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "nodemon --env-file=.env ./bin/www",
+    "start": "node  ./bin/www",
+    "dev": "nodemon ./bin/www",
     "test": "jest --coverage"
   },
   "dependencies": {
