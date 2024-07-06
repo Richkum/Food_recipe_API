@@ -61,13 +61,7 @@ Access the API documentation at the `/api-docs` endpoint. It provides detailed i
 
 ## Endpoints
 
-**Recipes**
-`GET /recipes`: Retrieve a list of all recipes.
-`GET /recipes/:id`: Retrieve a specific recipe by ID.
-`POST /recipes`: Create a new recipe.
-`PUT /recipes/:id`: Update a recipe by ID.
-`DELETE /recipes/:id`: Delete a recipe by ID.
-`GET /recipes/category/:id`: Get a list of recipes for a particular category.
+file:///home/atum/Pictures/Screenshots/recipe_api.png
 
 ## Contributing
 

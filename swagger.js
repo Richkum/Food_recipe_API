@@ -3,6 +3,7 @@ import swaggerUi from "swagger-ui-express";
 
 const swaggerOptions = {
   swaggerDefinition: {
+    openapi: "3.0.0", // Ensure you are using OpenAPI 3.0
     info: {
       title: "Food Recipe API",
       version: "1.0.0",
@@ -18,7 +19,7 @@ const swaggerOptions = {
       },
     ],
   },
-  apis: ["./routes/*.js"],
+  apis: ["./routes/*.js", "./swaggerSchemas.js"], // Ensure this path is correct
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
