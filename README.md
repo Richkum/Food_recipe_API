@@ -61,8 +61,6 @@ Access the API documentation at the `/api-docs` endpoint. It provides detailed i
 
 ## Endpoints
 
-file:///home/atum/Pictures/Screenshots/recipe_api.png
-
 ## Contributing
 
 Contributions are welcome! If you encounter any issues or have suggestions for improvements, please open an issue or submit a pull request.
