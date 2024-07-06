@@ -530,7 +530,7 @@ router.put(
  * /recipes/{id}:
  *   delete:
  *     summary: Delete a recipe
- *     description: Delete a recipe from the database by its ID. This will also delete any associated ingredients due to the cascading delete constraint.
+ *     description: Delete a recipe from the database by its ID.
  *     parameters:
  *       - in: path
  *         name: id
@@ -560,23 +560,25 @@ router.put(
  *                   type: string
  *                   example: Recipe not found
  */
-router.delete("/:id", async (req, res, next) => {
-  try {
-    const { id } = req.params;
+router.delete("/:id", (req, res, next) => {
+  const { id } = req.params;
 
-    const result = await pool.query(
-      "DELETE FROM recipes WHERE recipe_id = $1",
-      [id]
-    );
+  pool.query(
+    "DELETE FROM recipes WHERE recipe_id = $1",
+    [id],
+    (error, result) => {
+      if (error) {
+        next(error);
+        return;
+      }
 
-    if (result.rowCount === 0) {
-      return res.status(404).json({ error: "Recipe not found" });
+      if (result.rowCount === 0) {
+        res.status(404).json({ error: "Recipe not found" });
+      } else {
+        res.json({ message: "Recipe deleted successfully" });
+      }
     }
-
-    return res.json({ message: "Recipe deleted successfully" });
-  } catch (error) {
-    next(error);
-  }
+  );
 });
 
 export default router;
